@@ -61,8 +61,13 @@ lazy: true 在创建watcher时是否需要立即计算当前watcher的value值�
         优先promise，MutationObserver为微任务，task执行完毕，找到微任务，并执行，UI自渲染一次
         MutationObserver实现，查看源码可以知道每次timer都会触发一个DOM更新count=(count+1)%2,DOM更新便会触发回调
 ```
+### 待画序列图
+1,收集依赖(主要是计算属性)
+state.computedget(是不是脏数据,不是watch.value) ->watch.evaluate -> watch.get ->dep.pushtarget -Dep.target =computdwatcer ->执行依赖的get->有Dep.target->dep.add(watch)(因此当依赖变化时，把watch变为脏,下次就会刷新计算)->Dep.target=[];
+2,触发更新
+proxyset -> dep.notify -> (subs)watcher.update(如果lazy:true->dirty = true;页面绑定的有render watcher) ->  queueWatcher -> nextTick(flushSchedulerQueue保证3点)-> run -cb(user:自己的回调,render->updateComponent)
 
-
+3,updateComponent _render2vnode  __patch__   vm.$el = vm.__patch__(prevVnode, vnode);
 ### 数据流图
 
  ![image](./img/b.jpg)<br/>

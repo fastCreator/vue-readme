@@ -1,0 +1,61 @@
+1，Vue改变该对象上,array对象，触发 ob.dep.notify(); 观察变化
+2，计算属性，只有当依赖值变化时才会重新计算
+3，父组件，写在子组件的上的监听事件，会默认执行child.$on(''),但是方法却在父组件作用域
+4，data值，会通过 Object.defineProperty 设置在该实例上，所以只有data,才会触发get/set
+5，Vue.nextTick(callback) callback将会加在队列末尾
+6，响应式 	1：data:Vue通过object.defineProperties,生成get/set
+			2：set调用时，通知watcher，Vue 将开启一个队列，并缓冲在同一事件循环中发生的所有数据改变 watcher 被多次触发，只会一次推入到队列中
+		 	3：执行render生成vnode,调用patch diff算法比对dom,打补丁
+   			4： MutationObserver ,setTimeout产生回调
+7,$forceUpdate 迫使Vue实例重新渲染。注意它仅仅影响实例本身和插入插槽内容的子组件，而不是所有子组件。
+8,v-model.asyn
+9,v-pre v-cloak 
+9,v-on.capture  //添加修饰符`capture`后在捕获阶段中监听事件
+	捕获先执行父元素事件，再执行子元素事件
+	捕获先执行子元素事件，再执行父元素事件
+	IE只支持事件冒泡
+
+10，computed 的值没有set方法，所以get不会触发notice,不会更新数据,get方法为获取缓存数据
+11, computed 的值来自于，watcher的value;data的get/set直接原生差不多
+12,上次说的计算属性，第一步确实是判断是不是脏数据，计算属性的缓存是存在watcher里面的
+
+core:
+	instance:
+		events:初始化Vue事件 Vue.$on Vue.$once Vue.$off Vue.$emit
+		index:程序入口 new Vue() => this._init(options)
+		init:调用vue初始化方法(instance)  vm.$mount(vm.$options.el)
+		lifecycle:导出生命周期钩子函数callHook,为生命周期特定阶段运行方法,如_update=>__patch__
+		proxy:代理Vue.config.keyCodes=> makeMap('stop,prevent,self,ctrl,shift,alt,meta')报错
+		render:initRender vm添加属性方法 renderMixin Vue添加属性方法
+		state:初始化构造函数内传的值,props(defineReactive,设置get/set),methods,data(observe),computed(lazy,watcher.value),watch(immediate)
+	observer:
+		array:覆盖数组原生方法,触发dep.notify
+		dep:管理watcher依赖,get=>depend添加依赖,set notify触发
+		index:defineReactive 为对象添加get/set
+		scheduler:消息队列 queueWatcher nextTick(flushSchedulerQueue)
+		watcher:观察者，update =>更新消息队列
+	util:
+		debug:warn,formatComponentName 统一管理打印消息
+		env:平台判断(服务端渲染,安卓,IE等等);nextTick实现(Promise,MutationObserver,setTimeout) macrotasks: setTimeout 渲染两次UI;microtasks 在task后立即执行，只渲染一次UI
+		index:导出util包,以及observer defineReactive为对象添加get/set
+		lang:isReserved 检查字符串是否以$或_开头;def Object.defineProperty 默认定义对象描素;parsePath 解析路径(a.b.c)
+		options:mergeOptions 合并两个选项到一个选项(extend) resolveAsset 判断option[key]是否有该值
+	vdom:
+		helpers:
+			index:导出helpers包;getFirstComponentChild 获得第一个子组件
+			merge-hook:mergeVNodeHook 合并vnode钩子
+			normalize-children:序列化子组件1 正常简单 2 复杂嵌套
+			update-listeners:updateListeners 更新event
+		modules:
+			directive:
+			index:
+			ref
+		create-component:
+		create-element:
+		patch:
+		vnode:
+	config:
+	index:
+shared:
+	util:makeMap(检查key是否在字符串里面a=>a,b,c),isBuiltInTag(检查标签slot,component),cached创建纯函数缓存值,bind(简单比原生快)等函数
+	props:validateProp验证option[key].value 是否为空，type是否正确,默认值的话observe
